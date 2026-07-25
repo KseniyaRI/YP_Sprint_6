@@ -11,9 +11,9 @@ import java.time.Duration;
 public class MainPage {
 
     private WebDriver driver;
-    private WebDriverWait wait; 
+    private WebDriverWait wait;
 
-    //кнопка куки ("Да все привыкли")
+    //кнопка куки ("да все привыкли")
     private By cookieButton = By.xpath(".//button[contains(text(), 'да все привыкли')]");
     //кнопка Заказать в хэдере
     private By headerOrderButton = By.xpath("(.//button[text()='Заказать'])[1]");
@@ -29,31 +29,35 @@ public class MainPage {
     //методы
     //закрываем куки
     public void clickAcceptCookieButton() {
-        WebElement btn = wait.until(ExpectedConditions.presenceOfElementLocated(cookieButton));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btn);
+        wait.until(ExpectedConditions.elementToBeClickable(cookieButton)).click();
     }
 
     //кликаем на Заказать в хэдере
     public void clickCreateOrderHeaderButton() {
-        driver.findElement(headerOrderButton).click();
+        wait.until(ExpectedConditions.elementToBeClickable(headerOrderButton)).click();
     }
 
-    //кликаем на Заказать с прокруткой
+    //кликаем на Заказать в середине страницы (с прокруткой)
     public void clickCreateOrderMiddleButton() {
-        WebElement button = wait.until(ExpectedConditions.presenceOfElementLocated(middleOrderButton));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true); arguments[0].click();", button);
+        scrollTo(wait.until(ExpectedConditions.presenceOfElementLocated(middleOrderButton)));
+        wait.until(ExpectedConditions.elementToBeClickable(middleOrderButton)).click();
     }
 
     //раскрываем выпадашки Вопросов о важном
     public void clickQuestion(int index) {
-        WebElement heading = wait.until(
-            ExpectedConditions.presenceOfElementLocated(By.id("accordion__heading-" + index)));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true); arguments[0].click();", heading);
+        By heading = By.id("accordion__heading-" + index);
+        scrollTo(wait.until(ExpectedConditions.presenceOfElementLocated(heading)));
+        wait.until(ExpectedConditions.elementToBeClickable(heading)).click();
     }
 
     //получаем текст в выпадашке
     public String getAnswerText(int index) {
         WebElement panel = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("accordion__panel-" + index)));
         return panel.getText();
+    }
+
+    //метод прокрутки страницы
+    private void scrollTo(WebElement element) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
     }
 }

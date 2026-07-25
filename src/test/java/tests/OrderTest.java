@@ -1,62 +1,51 @@
 package tests;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
+import com.github.javafaker.Faker;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import pageobjects.OrderPage;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import pageobjects.MainPage;
+import pageobjects.OrderConfirmationPage;
+import pageobjects.OrderFirstStepPage;
+import pageobjects.OrderSecondStepPage;
 
-public class OrderTest {
-    
-    private WebDriver driver;
+import java.time.LocalDate;
+import java.util.Locale;
 
-    @BeforeEach
-    void setUp() {
-        String browser = System.getProperty("browser", "chrome");
-        if (browser.equalsIgnoreCase("firefox")) {
-            FirefoxOptions options = new FirefoxOptions();
-            options.addArguments("--headless");
-            driver = new FirefoxDriver(options);
-        } else {
-            ChromeOptions options = new ChromeOptions();
-            options.addArguments("--no-sandbox", "--headless", "--disable-dev-shm-usage");
-            driver = new ChromeDriver(options);
-        }
-        driver.get("https://qa-scooter.education-services.ru/");
-    }    
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+public class OrderTest extends BaseTest {
+
+    private Faker faker = new Faker(new Locale("ru"));
+
+    //наборы данных: станция метро, через сколько дней доставка, срок аренды, цвет, точка входа
     @ParameterizedTest
     @CsvSource({
-        "Иван, Петров, ул. Воздушная 3, Черкизовская, 89819818070, 21, трое суток, black, Комментарий для курьера, header",
-        "Мария, Сидорова, пр. Мира 10, Сокольники, 89990001122, 22, сутки, grey, Без комментариев, middle"})
+        "Черкизовская, 1, трое суток, black, header",
+        "Сокольники, 3, сутки, grey, middle"})
+    void checkCreateOrder(String stationName, int daysFromToday, String period, String color, String entryPoint) {
+        String username = faker.name().firstName();
+        String surname = faker.name().lastName();
+        String address = faker.numerify("улица Тестовая, дом ##, квартира ##");
+        String phoneNumber = faker.numerify("89#########");
+        String comment = faker.numerify("Позвонить за ## минут до доставки");
+        LocalDate deliveryDate = LocalDate.now().plusDays(daysFromToday);
 
-    void checkCreateOrder(String username, String surname, String address, String stationName, 
-        String phoneNumber, String day, String period, String color, String comment, String entryPoint) {
-        MainPage mainpage = new MainPage(driver);
-        OrderPage orderpage = new OrderPage(driver);
-
-        mainpage.clickAcceptCookieButton();
+        MainPage mainPage = new MainPage(driver);
+        mainPage.clickAcceptCookieButton();
         if (entryPoint.equals("header")) {
-            mainpage.clickCreateOrderHeaderButton();
+            mainPage.clickCreateOrderHeaderButton();
         } else {
-            mainpage.clickCreateOrderMiddleButton();
+            mainPage.clickCreateOrderMiddleButton();
         }
 
-        orderpage.setFirstStepOrder(username, surname, address, stationName, phoneNumber);
-        orderpage.setSecondStepOrder(day, period, color, comment);
-        orderpage.clickConfirmationOfOrderButton();
-        assertTrue(orderpage.isOrderConfirmed(), "Всплывающее окно 'Заказ оформлен' не появилось");
-    }
+        OrderFirstStepPage firstStepPage = new OrderFirstStepPage(driver);
+        firstStepPage.setFirstStepOrder(username, surname, address, stationName, phoneNumber);
 
-    @AfterEach
-    public void tearDown() {
-        driver.quit();
+        OrderSecondStepPage secondStepPage = new OrderSecondStepPage(driver);
+        secondStepPage.setSecondStepOrder(deliveryDate, period, color, comment);
+
+        OrderConfirmationPage confirmationPage = new OrderConfirmationPage(driver);
+        confirmationPage.clickConfirmationOfOrderButton();
+        assertTrue(confirmationPage.isOrderConfirmed(), "Всплывающее окно 'Заказ оформлен' не появилось");
     }
 }

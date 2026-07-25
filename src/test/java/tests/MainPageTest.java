@@ -1,36 +1,12 @@
 package tests;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import pageobjects.MainPage;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
-public class MainPageTest {
-
-    private WebDriver driver;
-
-    @BeforeEach
-    void setUp() {
-        String browser = System.getProperty("browser", "chrome");
-        if (browser.equalsIgnoreCase("firefox")) {
-            FirefoxOptions options = new FirefoxOptions();
-            options.addArguments("--headless");
-            driver = new FirefoxDriver(options);
-        } else {
-            ChromeOptions options = new ChromeOptions();
-            options.addArguments("--no-sandbox", "--headless", "--disable-dev-shm-usage");
-            driver = new ChromeDriver(options);
-        }
-        driver.get("https://qa-scooter.education-services.ru/");
-    }
+public class MainPageTest extends BaseTest {
 
     @ParameterizedTest
     @CsvSource({
@@ -43,16 +19,10 @@ public class MainPageTest {
         "6, 'Да, пока самокат не привезли. Штрафа не будет, объяснительной записки тоже не попросим. Все же свои.'",
         "7, 'Да, обязательно. Всем самокатов! И Москве, и Московской области.'"
     })
-
     void checkDropDownQuestions(int index, String expectedText) {
-        MainPage mainpage = new MainPage(driver);
-        mainpage.clickAcceptCookieButton();
-        mainpage.clickQuestion(index);
-        assertEquals(expectedText, mainpage.getAnswerText(index), "При открытии вопроса " + index + " отображается не тот текст/текст не отображается");
-    }
-
-    @AfterEach
-    public void tearDown() {
-        driver.quit();
+        MainPage mainPage = new MainPage(driver);
+        mainPage.clickAcceptCookieButton();
+        mainPage.clickQuestion(index);
+        assertEquals(expectedText, mainPage.getAnswerText(index), "При открытии вопроса " + index + " отображается не тот текст/текст не отображается");
     }
 }
