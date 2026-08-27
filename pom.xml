@@ -19,6 +19,7 @@
         <maven.compiler.release>11</maven.compiler.release>
         <junit.version>5.10.2</junit.version>
         <selenium.version>4.27.0</selenium.version>
+        <javafaker.version>1.0.2</javafaker.version>
     </properties>
 
     <dependencies>
@@ -32,6 +33,12 @@
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
             <version>${selenium.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.javafaker</groupId>
+            <artifactId>javafaker</artifactId>
+            <version>${javafaker.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
